@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
-    const backendURL = "https://bpa-backend-j4ck.onrender.com";
+    // 🔹 Use deployed backend instead of localhost
+const backendURL = "https://bpa-backend-1.onrender.com";
 
     if (!loginForm) return;
 
