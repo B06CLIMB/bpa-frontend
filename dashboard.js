@@ -1,19 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ----------------- USER INFO -----------------
     const userName = localStorage.getItem('userName');
     const userAge = localStorage.getItem('userAge');
-   // 🔹 Use deployed backend instead of localhost
-const backendURL = "https://bpa-backend-1.onrender.com";
-
 
     if (!userName) {
         window.location.href = 'index.html';
         return;
     }
 
-    // Sidebar user info
-    document.getElementById('userName').textContent = userName;
-    document.getElementById('userAge').textContent = `Age: ${userAge}`;
+    // Update dashboard with user info
+    const userNameEl = document.getElementById('userName');
+    const userAgeEl = document.getElementById('userAge');
+    if (userNameEl) userNameEl.textContent = `Name: ${userName}`;
+    if (userAgeEl) userAgeEl.textContent = `Age: ${userAge}`;
 
+    // ----------------- CONFIG -----------------
+    const backendURL = "https://bpa-backend-1.onrender.com";
+
+    // DOM elements
+    const uploadFileLabel = document.getElementById('uploadFileLabel');
+    const capturePhotoLabel = document.getElementById('capturePhotoLabel');
     const imageInput = document.getElementById('imageInput');
     const imagePreview = document.getElementById('image-preview');
     const enhanceBtn = document.querySelector('.enhance-btn');
@@ -26,98 +32,100 @@ const backendURL = "https://bpa-backend-1.onrender.com";
     const breedNameElement = document.getElementById('breed-name');
     const confidenceValueElement = document.getElementById('confidence-value');
     const confirmBtn = document.querySelector('.confirm-btn');
-    const logoutBtn = document.querySelector('.logout-btn');
     const collectedPhotosGrid = document.getElementById('collected-photos-grid');
     const breedCountsTable = document.getElementById('breed-counts');
+    const logoutBtn = document.querySelector('.logout-btn');
+    const navItems = document.querySelectorAll('.nav-item');
 
     let collectedData = [];
     let breedStatistics = {};
 
-    // Fetch existing user data
+    // ----------------- FETCH USER DATA -----------------
     fetch(`${backendURL}/data?name=${userName}`)
-    .then(res => res.json())
-    .then(data => {
-        collectedData = data.data || [];
-        collectedData.forEach(r => breedStatistics[r.breed] = (breedStatistics[r.breed] || 0) + 1);
-        loadCollectedData();
-        updateStats();
-    })
-    .catch(err => console.error('Error fetching data:', err));
+        .then(res => res.json())
+        .then(data => {
+            collectedData = data.data || [];
+            collectedData.forEach(r => {
+                breedStatistics[r.breed] = (breedStatistics[r.breed] || 0) + 1;
+            });
+            loadCollectedData();
+            updateStats();
+        })
+        .catch(err => console.error('Error fetching data:', err));
 
-    // Image preview and AI prediction
+    // ----------------- IMAGE UPLOAD & CAPTURE -----------------
+    if (uploadFileLabel) uploadFileLabel.addEventListener('click', () => imageInput.removeAttribute('capture'));
+    if (capturePhotoLabel) capturePhotoLabel.addEventListener('click', () => imageInput.setAttribute('capture', 'camera'));
+
     if (imageInput) {
-        imageInput.addEventListener('change', (e) => {
+        imageInput.addEventListener('change', e => {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                imagePreview.src = ev.target.result;
+            reader.onload = e => {
+                imagePreview.src = e.target.result;
                 imagePreview.classList.remove('hidden');
                 if (enhanceControls) enhanceControls.classList.add('hidden');
                 imagePreview.style.filter = 'brightness(100%) contrast(100%)';
-                if (brightnessControl) brightnessControl.value = 100;
-                if (contrastControl) contrastControl.value = 100;
-
-                predictBreed(file); // Call backend AI
+                brightnessControl.value = 100;
+                contrastControl.value = 100;
+                showPrediction(file);
             };
             reader.readAsDataURL(file);
         });
     }
 
-    // Image enhancement
     if (enhanceBtn) enhanceBtn.addEventListener('click', () => {
-        if (!imagePreview.src || imagePreview.src === '#') return alert('Upload a photo first.');
+        if (!imagePreview.src) return alert('Upload or capture a photo first.');
         if (enhanceControls) enhanceControls.classList.toggle('hidden');
     });
 
-    [brightnessControl, contrastControl].forEach(control => {
-        if (!control) return;
-        control.addEventListener('input', () => {
+    if (brightnessControl && contrastControl) {
+        const applyFilter = () => {
             imagePreview.style.filter = `brightness(${brightnessControl.value}%) contrast(${contrastControl.value}%)`;
-        });
-    });
+        };
+        brightnessControl.addEventListener('input', applyFilter);
+        contrastControl.addEventListener('input', applyFilter);
+    }
 
-    // Predict breed using backend AI
-    function predictBreed(file) {
+    // ----------------- AI PREDICTION -----------------
+    function showPrediction(file) {
         if (!predictionCard) return;
-
         predictionCard.style.display = 'block';
-        loadingSpinner.classList.remove('hidden');
-        predictionResultDiv.classList.add('hidden');
+        if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+        if (predictionResultDiv) predictionResultDiv.classList.add('hidden');
 
         const formData = new FormData();
         formData.append('file', file);
 
         fetch(`${backendURL}/predict`, { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(data => {
-            loadingSpinner.classList.add('hidden');
-            predictionResultDiv.classList.remove('hidden');
+            .then(res => res.json())
+            .then(result => {
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+                if (predictionResultDiv) predictionResultDiv.classList.remove('hidden');
 
-            breedNameElement.textContent = data.breed;
-            confidenceValueElement.textContent = data.confidence.toFixed(2);
+                breedNameElement.textContent = result.breed;
+                confidenceValueElement.textContent = result.confidence.toFixed(2);
 
-            if (confirmBtn) {
                 confirmBtn.onclick = () => {
-                    saveData(file, data.breed);
-                    alert(`Successfully registered a ${data.breed}.`);
+                    saveData(file, result.breed);
+                    alert(`Successfully registered a ${result.breed}.`);
                     predictionCard.style.display = 'none';
                 };
-            }
-        })
-        .catch(err => {
-            loadingSpinner.classList.add('hidden');
-            console.error('Prediction error:', err);
-            alert('Failed to predict breed. Try again.');
-        });
+            })
+            .catch(err => {
+                console.error('Prediction error:', err);
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+                alert('Prediction failed. Try again.');
+            });
     }
 
-    // Save data to backend
+    // ----------------- SAVE DATA -----------------
     function saveData(file, breed) {
         const newRecord = {
             image: URL.createObjectURL(file),
-            breed,
+            breed: breed,
             date: new Date().toLocaleDateString()
         };
 
@@ -136,15 +144,14 @@ const backendURL = "https://bpa-backend-1.onrender.com";
         .catch(err => console.error('Error saving data:', err));
     }
 
-    // Load collected photos
+    // ----------------- LOAD COLLECTED DATA -----------------
     function loadCollectedData() {
         if (!collectedPhotosGrid) return;
         collectedPhotosGrid.innerHTML = '';
-        if (!collectedData.length) {
+        if (collectedData.length === 0) {
             collectedPhotosGrid.innerHTML = '<p style="text-align:center;">No photos collected yet.</p>';
             return;
         }
-
         collectedData.forEach(item => {
             const card = document.createElement('div');
             card.className = 'collected-photo-card';
@@ -157,28 +164,40 @@ const backendURL = "https://bpa-backend-1.onrender.com";
         });
     }
 
-    // Update breed stats table
+    // ----------------- UPDATE STATS -----------------
     function updateStats() {
         if (!breedCountsTable) return;
-
-        let tableHTML = `
-            <h3>Total Breeds Identified</h3>
-            <table>
-                <thead><tr><th>Breed</th><th>Count</th></tr></thead>
-                <tbody>
-        `;
+        let html = `<h3>Total Breeds Identified</h3><table><thead><tr><th>Breed</th><th>Count</th></tr></thead><tbody>`;
         for (const breed in breedStatistics) {
-            tableHTML += `<tr><td>${breed}</td><td>${breedStatistics[breed]}</td></tr>`;
+            html += `<tr><td>${breed}</td><td>${breedStatistics[breed]}</td></tr>`;
         }
-        tableHTML += '</tbody></table>';
-        breedCountsTable.innerHTML = tableHTML;
+        html += '</tbody></table>';
+        breedCountsTable.innerHTML = html;
     }
 
-    // Logout
-    if (logoutBtn) logoutBtn.addEventListener('click', () => {
-        localStorage.clear();
-        window.location.href = 'index.html';
-    });
+    // ----------------- NAVIGATION -----------------
+    if (navItems) {
+        navItems.forEach(item => {
+            item.addEventListener('click', e => {
+                e.preventDefault();
+                navItems.forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                const target = item.dataset.target;
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.toggle('hidden', section.id !== target);
+                });
+            });
+        });
+    }
+
+    // ----------------- LOGOUT -----------------
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        });
+    }
 });
+
 
 
