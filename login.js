@@ -11,11 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const age = document.getElementById('age').value.trim();
         const password = document.getElementById('password').value;
 
-        if (!name || !age || !password) {
-            return alert('Please fill in all fields.');
-        }
+        if (!name || !age || !password) return alert('Please fill in all fields.');
 
-        // Clear old local storage data before login
+        // Clear old local storage
         localStorage.clear();
 
         fetch(`${backendURL}/login`, {
@@ -39,3 +37,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
