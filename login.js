@@ -1,39 +1,52 @@
+// login.js
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+    // Render backend URL
+    const backendURL = "https://bpa-backend-1.onrender.com";
 
-            const name = document.getElementById('name').value;
-            const age = document.getElementById('age').value;
-            const password = document.getElementById('password').value;
+    loginForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            localStorage.clear();
+        const name = document.getElementById('name').value.trim();
+        const age = document.getElementById('age').value.trim();
+        const password = document.getElementById('password').value;
 
-            const backendURL = "https://bpa-backend-1.onrender.com";
+        if (!name || !age || !password) {
+            alert('Please fill in all fields.');
+            return;
+        }
 
-            fetch(`${backendURL}/login`, {
+        // Clear any previous login info
+        localStorage.clear();
+
+        try {
+            const res = await fetch(`${backendURL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, age, password })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.message.includes('Login successful') || data.message.includes('New user registered')) {
-                    localStorage.setItem('userName', name);
-                    localStorage.setItem('userAge', age);
-                    window.location.href = 'dashboard.html';
-                } else {
-                    alert(data.message || 'Invalid login');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Could not connect to the server. Wait a minute if the backend is cold.');
             });
-        });
-    }
+
+            const data = await res.json();
+
+            if (res.ok && (data.message.includes('Login successful') || data.message.includes('New user registered'))) {
+                localStorage.setItem('userName', name);
+                localStorage.setItem('userAge', age);
+
+                alert(data.message);
+                window.location.href = 'dashboard.html';
+            } else if (res.status === 401) {
+                alert('Invalid password. Try again.');
+            } else {
+                alert(data.message || 'Login failed. Try again.');
+            }
+
+        } catch (err) {
+            console.error('Login error:', err);
+            alert('Could not connect to server. Wait a few seconds if the backend is waking up.');
+        }
+    });
 });
+
 
 
