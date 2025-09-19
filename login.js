@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     if (!loginForm) return;
 
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm.addEventListener('submit', async e => {
         e.preventDefault();
 
         const name = document.getElementById('name').value.trim();
@@ -13,9 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('All fields are required!');
             return;
         }
-
-        // Clear previous login info
-        localStorage.clear();
 
         const backendURL = "https://bpa-backend-1.onrender.com";
 
@@ -41,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
 
 
 
