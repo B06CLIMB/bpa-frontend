@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bharat Pashudhan App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="user-info">
+                <img src="https://via.placeholder.com/100" alt="User Profile" class="profile-pic">
+                <h3 id="userName">User Name</h3>
+                <p id="userAge">Age: 35</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-target="home">Home</a>
+                <a href="#" class="nav-item" data-target="collected">Collected Photos</a>
+                <a href="#" class="nav-item" data-target="stats">Statistics</a>
+                <a href="#" class="nav-item" data-target="help">Help</a>
+            </nav>
+            <button class="logout-btn">Log Out</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Government_of_India.svg/1200px-Government_of_India.svg.png" alt="Govt. of India Logo" class="header-logo">
+                <h1>Bharat Pashudhan App</h1>
+                <p>Your AI-driven partner for livestock data.</p>
+            </header>
+
+            <div class="content-section" id="home">
+                <div class="feature-card">
+                    <h2>Take a Photo</h2>
+                    <div class="image-upload-area">
+                        <input type="file" id="imageInput" accept="image/*" class="hidden">
+                        
+                        <label for="imageInput" class="btn upload-btn" id="uploadFileLabel">Upload File</label>
+                        <label for="imageInput" class="btn capture-btn" id="capturePhotoLabel">Capture Now</label>
+                        
+                        <img id="image-preview" src="#" alt="Image Preview" class="hidden">
+                        
+                        <div id="image-enhancement-controls" class="hidden">
+                            <label>Brightness</label>
+                            <input type="range" id="brightness" min="0" max="200" value="100">
+                            <label>Contrast</label>
+                            <input type="range" id="contrast" min="0" max="200" value="100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card" id="prediction-card" style="display: none;">
+                    <h2>AI Prediction</h2>
+                    <div class="loading-spinner hidden"></div>
+                    <div id="prediction-result" class="hidden">
+                        <p>The predicted breed is:</p>
+                        <h3 id="breed-name"></h3>
+                        <p class="confidence-score">Confidence: <span id="confidence-value"></span>%</p>
+                        <button class="confirm-btn">Confirm Breed</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section hidden" id="collected">
+                <h2>Collected Photos</h2>
+                <div id="collected-photos-grid">
+                    </div>
+            </div>
+
+            <div class="content-section hidden" id="stats">
+                <h2>Statistics</h2>
+                <div id="breed-counts" class="stats-table">
+                    <h3>Total Breeds Identified</h3>
+                    </div>
+            </div>
+            
+        </main>
+    </div>
+    <script src="dashboard.js"></script>
+</body>
+</html>
