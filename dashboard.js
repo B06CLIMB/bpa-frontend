@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // 🔹 Use deployed backend instead of localhost
+    const backendURL = "https://bpa-backend-j4ck.onrender.com";
+
     const uploadFileLabel = document.getElementById('uploadFileLabel');
     const capturePhotoLabel = document.getElementById('capturePhotoLabel');
     const imageInput = document.getElementById('imageInput');
@@ -32,12 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let breedStatistics = {};
     
     // This function fetches data from the backend when the page loads
-    fetch(`http://127.0.0.1:5000/data?name=${userName}`)
+    fetch(`${backendURL}/data?name=${userName}`)
     .then(response => response.json())
     .then(data => {
-        // The backend now sends the whole user object
         collectedData = data.data;
-        // Recalculate stats from the fetched data
         collectedData.forEach(record => {
             breedStatistics[record.breed] = (breedStatistics[record.breed] || 0) + 1;
         });
@@ -111,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loadingSpinner) loadingSpinner.classList.remove('hidden');
             if (predictionResultDiv) predictionResultDiv.classList.add('hidden');
             
-            // This is the simulated AI response
             setTimeout(() => {
                 if (loadingSpinner) loadingSpinner.classList.add('hidden');
                 if (predictionResultDiv) predictionResultDiv.classList.remove('hidden');
@@ -131,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // This function saves data to the backend
     function saveData(file, breed) {
         const newRecord = {
             image: URL.createObjectURL(file),
@@ -139,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             date: new Date().toLocaleDateString()
         };
         
-        fetch('http://127.0.0.1:5000/data', {
+        fetch(`${backendURL}/data`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: userName, record: newRecord })
@@ -155,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error saving data:', error));
     }
 
-    // --- Sidebar Navigation and Data Display ---
     function loadCollectedData() {
         if (collectedPhotosGrid) {
             collectedPhotosGrid.innerHTML = '';
@@ -194,7 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Handles showing/hiding different sections based on nav clicks
     if (navItems) {
         navItems.forEach(item => {
             item.addEventListener('click', (e) => {
@@ -213,8 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handles the logout functionality
-    if(logoutBtn) {
+    if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.clear();
             window.location.href = 'index.html';
