@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const userName = localStorage.getItem('userName');
     const userAge = localStorage.getItem('userAge');
-    const backendURL = "https://bpa-backend-j4ck.onrender.com";
+   // 🔹 Use deployed backend instead of localhost
+const backendURL = "https://bpa-backend-1.onrender.com";
+
 
     if (!userName) {
         window.location.href = 'index.html';
