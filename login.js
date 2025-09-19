@@ -8,10 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const age = document.getElementById('age').value;
             const password = document.getElementById('password').value;
 
-            // Crucial step: Clear all old data before a new login
+            // Clear old data before a new login
             localStorage.clear();
 
-            fetch('http://127.0.0.1:5000/login', {
+            // 🔹 Use deployed backend instead of localhost
+            const backendURL = "https://bpa-backend-j4ck.onrender.com";
+
+            fetch(`${backendURL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, age, password })
