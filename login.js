@@ -1,11 +1,8 @@
-// login.js
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
+    if (!loginForm) return;
 
-    // Render backend URL
-    const backendURL = "https://bpa-backend-1.onrender.com";
-
-    loginForm?.addEventListener('submit', async (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const name = document.getElementById('name').value.trim();
@@ -13,12 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('password').value;
 
         if (!name || !age || !password) {
-            alert('Please fill in all fields.');
+            alert('All fields are required!');
             return;
         }
 
-        // Clear any previous login info
+        // Clear previous login info
         localStorage.clear();
+
+        const backendURL = "https://bpa-backend-1.onrender.com";
 
         try {
             const res = await fetch(`${backendURL}/login`, {
@@ -32,21 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok && (data.message.includes('Login successful') || data.message.includes('New user registered'))) {
                 localStorage.setItem('userName', name);
                 localStorage.setItem('userAge', age);
-
-                alert(data.message);
                 window.location.href = 'dashboard.html';
-            } else if (res.status === 401) {
-                alert('Invalid password. Try again.');
             } else {
-                alert(data.message || 'Login failed. Try again.');
+                alert(data.message || 'Invalid credentials.');
             }
-
         } catch (err) {
-            console.error('Login error:', err);
-            alert('Could not connect to server. Wait a few seconds if the backend is waking up.');
+            console.error(err);
+            alert('Could not connect to server. Try again in a few seconds.');
         }
     });
 });
+
 
 
 
