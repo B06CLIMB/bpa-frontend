@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(res => res.json())
                 .then(result => {
                     breedNameEl.textContent = result.breed;
-                    confidenceEl.textContent = (result.confidence * 100).toFixed(2);
+                    // Backend already returns percentage
+                    confidenceEl.textContent = result.confidence.toFixed(2) + '%';
                     predictionResultDiv.classList.remove('hidden');
                 })
                 .catch(err => {
