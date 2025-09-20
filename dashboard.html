@@ -5,20 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BPA - Buffalo Breed Prediction</title>
 <link rel="stylesheet" href="style.css">
-<style>
-  /* Additional button styling for image upload */
-  .upload-btn {
-    display: inline-block;
-    background-color: var(--primary-color);
-    color: var(--text-color-light);
-    padding: 12px 25px;
-    border: none;
-    border-radius: 50px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  .upload-btn:hover { background-color: #004d40; }
-</style>
 </head>
 <body>
 
@@ -27,8 +13,8 @@
     <p id="userInfo"></p>
 
     <div class="image-upload-area">
-        <button class="upload-btn" id="uploadBtn">Upload Image</button>
-        <input type="file" id="imageInput" accept="image/*" style="display:none;">
+        <button id="uploadBtn" class="upload-btn">Upload Image</button>
+        <input type="file" id="imageInput" accept="image/*">
         <img id="image-preview" alt="Preview">
     </div>
 
@@ -41,79 +27,9 @@
         </div>
     </div>
 
-    <button id="logoutBtn">Log Out</button>
+    <button id="logoutBtn" class="logout-btn">Log Out</button>
 </div>
 
 <script src="dashboard.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const userName = localStorage.getItem('userName');
-    const userAge = localStorage.getItem('userAge');
-
-    if (!userName) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    document.getElementById('userInfo').textContent = `Name: ${userName}, Age: ${userAge}`;
-
-    const backendURL = "https://bpa-backend-1.onrender.com";
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('image-preview');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const predictionCard = document.getElementById('prediction-card');
-    const predictionResultDiv = document.getElementById('prediction-result');
-    const breedNameEl = document.getElementById('breed-name');
-    const confidenceEl = document.getElementById('confidence-value');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    uploadBtn.addEventListener('click', () => {
-        imageInput.click(); // Trigger hidden file input
-    });
-
-    imageInput.addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = e => {
-            imagePreview.src = e.target.result;
-            imagePreview.style.display = 'block';
-
-            predictionCard.style.display = 'block';
-            predictionResultDiv.style.display = 'none';
-            loadingSpinner.style.display = 'block';
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            fetch(`${backendURL}/predict`, { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(result => {
-                    loadingSpinner.style.display = 'none';
-                    if (result.error) {
-                        alert('Prediction failed: ' + result.error);
-                        return;
-                    }
-                    breedNameEl.textContent = result.breed;
-                    confidenceEl.textContent = result.confidence.toFixed(2) + '%';
-                    predictionResultDiv.style.display = 'block';
-                })
-                .catch(err => {
-                    loadingSpinner.style.display = 'none';
-                    console.error('Prediction error:', err);
-                    alert('Prediction failed. Try again.');
-                });
-        };
-        reader.readAsDataURL(file);
-    });
-
-    logoutBtn.addEventListener('click', () => {
-        localStorage.clear();
-        window.location.href = 'index.html';
-    });
-});
-</script>
 </body>
 </html>
