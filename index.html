@@ -3,72 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buffalo Breed Prediction</title>
+  <title>BPA - Login</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 30px; }
-    h1 { color: #2E86C1; }
-    button { margin-top: 10px; padding: 8px 15px; cursor: pointer; }
-    #predictionResult { margin-top: 20px; font-weight: bold; }
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f8ff; }
+    .login-container { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+    input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; background: #2E86C1; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #1B4F72; }
   </style>
 </head>
 <body>
 
-  <h1>Buffalo Breed Prediction</h1>
-  <p id="userInfo">Name: admin, Age: 23</p>
-  <button id="logoutBtn">Log Out</button>
+<div class="login-container">
+  <h2>Login</h2>
+  <input type="text" id="name" placeholder="Enter your name" required>
+  <input type="number" id="age" placeholder="Enter your age" required>
+  <button id="loginBtn">Login</button>
+</div>
 
-  <hr>
+<script>
+  const loginBtn = document.getElementById('loginBtn');
 
-  <h2>Upload Buffalo Image</h2>
-  <input type="file" id="imageInput" accept="image/*">
-  <br>
-  <button id="predictBtn">Predict Breed</button>
+  loginBtn.addEventListener('click', () => {
+    const name = document.getElementById('name').value.trim();
+    const age = document.getElementById('age').value.trim();
 
-  <p id="predictionResult"></p>
+    if (!name || !age) {
+      alert('Please enter both name and age.');
+      return;
+    }
 
-  <script>
-    const backendUrl = "http://127.0.0.1:5000"; // Change to your deployed backend if needed
-    const predictBtn = document.getElementById("predictBtn");
-    const imageInput = document.getElementById("imageInput");
-    const predictionResult = document.getElementById("predictionResult");
-    const logoutBtn = document.getElementById("logoutBtn");
+    // Store user info in localStorage
+    localStorage.setItem('userName', name);
+    localStorage.setItem('userAge', age);
 
-    predictBtn.addEventListener("click", async () => {
-      if (!imageInput.files[0]) {
-        alert("Please select an image first!");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("file", imageInput.files[0]);
-
-      predictionResult.textContent = "Predicting...";
-
-      try {
-        const response = await fetch(`${backendUrl}/predict`, {
-          method: "POST",
-          body: formData
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-          predictionResult.textContent = `Error: ${data.error}`;
-        } else {
-          predictionResult.textContent = `Breed: ${data.breed} | Confidence: ${data.confidence.toFixed(2)}%`;
-        }
-
-      } catch (err) {
-        predictionResult.textContent = `Request failed: ${err}`;
-      }
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      alert("Logged out! Refresh page to log in again.");
-      // Optionally, you can redirect to a login page here
-      // window.location.href = "login.html";
-    });
-  </script>
+    // Redirect to dashboard
+    window.location.href = 'dashboard.html';
+  });
+</script>
 
 </body>
 </html>
