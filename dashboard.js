@@ -1,19 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Get user info from localStorage
     const userName = localStorage.getItem('userName');
     const userAge = localStorage.getItem('userAge');
 
     if (!userName) {
-        // Redirect to login if not logged in
         window.location.href = 'index.html';
         return;
     }
 
     document.getElementById('userInfo').textContent = `Name: ${userName}, Age: ${userAge}`;
 
-    // Elements
-    const backendURL = "https://bpa-backend-1.onrender.com"; // Deployed backend URL
+    const backendURL = "https://bpa-backend-1.onrender.com";
     const imageInput = document.getElementById('imageInput');
+    const uploadBtn = document.getElementById('uploadBtn');
     const imagePreview = document.getElementById('image-preview');
     const predictionCard = document.getElementById('prediction-card');
     const predictionResultDiv = document.getElementById('prediction-result');
@@ -22,12 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // Image upload & prediction
+    // Trigger file input when button clicked
+    uploadBtn.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    // Handle image selection & prediction
     imageInput.addEventListener('change', e => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Show preview
         const reader = new FileReader();
         reader.onload = e => {
             imagePreview.src = e.target.result;
