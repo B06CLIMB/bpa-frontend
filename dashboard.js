@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('userInfo').textContent = `Name: ${userName}, Age: ${userAge}`;
 
-    const backendURL = "https://bpa-backend-1.onrender.com"; 
+    const backendURL = "https://bpa-backend-1.onrender.com"; // replace with your backend URL
     const imageInput = document.getElementById('imageInput');
-    const uploadBtn = document.getElementById('uploadBtn');
     const imagePreview = document.getElementById('image-preview');
+    const uploadBtn = document.getElementById('uploadBtn');
     const predictionCard = document.getElementById('prediction-card');
     const predictionResultDiv = document.getElementById('prediction-result');
     const breedNameEl = document.getElementById('breed-name');
@@ -20,12 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // Trigger file selection on button click
+    // Trigger hidden file input
     uploadBtn.addEventListener('click', () => {
         imageInput.click();
     });
 
-    // Handle image selection & prediction
+    // Handle image selection and prediction
     imageInput.addEventListener('change', e => {
         const file = e.target.files[0];
         if (!file) return;
