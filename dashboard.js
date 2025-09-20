@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('userInfo').textContent = `Name: ${userName}, Age: ${userAge}`;
 
-    const backendURL = "https://bpa-backend-1.onrender.com";
+    const backendURL = "https://bpa-backend-1.onrender.com"; 
     const imageInput = document.getElementById('imageInput');
     const uploadBtn = document.getElementById('uploadBtn');
     const imagePreview = document.getElementById('image-preview');
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // Trigger file input when button clicked
+    // Trigger file selection on button click
     uploadBtn.addEventListener('click', () => {
         imageInput.click();
     });
