@@ -20,12 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`${backendURL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, age, password })
+                body: JSON.stringify({ username: name, age, password })
             });
 
             const data = await res.json();
 
-            if (res.ok && (data.message.includes('Login successful') || data.message.includes('New user registered'))) {
+            if (res.ok && data.success) {
                 localStorage.setItem('userName', name);
                 localStorage.setItem('userAge', age);
                 window.location.href = 'dashboard.html';
@@ -38,8 +38,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-
-
-
-
