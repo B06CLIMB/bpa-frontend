@@ -3,8 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BPA - Prediction</title>
+<title>BPA - Buffalo Breed Prediction</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+  .dashboard-container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; }
+  h1 { color: #2E86C1; margin-bottom: 10px; }
+  input[type="file"] { margin: 10px 0; }
+  #image-preview { max-width: 100%; margin-top: 10px; display: none; border-radius: 5px; }
+  #prediction-card { margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px; display: none; }
+  .loading-spinner { display: none; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  button { margin-top: 15px; padding: 10px 20px; background: #2E86C1; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background: #1B4F72; }
+</style>
 </head>
 <body>
 <div class="dashboard-container">
@@ -12,11 +24,11 @@
     <p id="userInfo"></p>
 
     <input type="file" id="imageInput" accept="image/*">
-    <img id="image-preview" src="#" alt="Preview" class="hidden">
+    <img id="image-preview" alt="Preview">
 
-    <div id="prediction-card" style="display:none;">
-        <div class="loading-spinner hidden"></div>
-        <div id="prediction-result" class="hidden">
+    <div id="prediction-card">
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        <div id="prediction-result">
             <p>Predicted breed:</p>
             <h2 id="breed-name"></h2>
             <p>Confidence: <span id="confidence-value"></span></p>
