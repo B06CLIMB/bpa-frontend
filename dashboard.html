@@ -1,35 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BPA - Buffalo Breed Prediction</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPA Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; color: #333; }
+        .dashboard-header { background-color: #2c3e50; color: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .dashboard-header h1 { margin: 0; font-size: 24px; }
+        .dashboard-header button { background-color: #e74c3c; color: #fff; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .dashboard-container { padding: 20px; display: flex; justify-content: center; }
+        .main-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; width: 100%; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .card h2 { color: #2980b9; margin-top: 0; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        #image-upload { display: block; margin: 15px 0; }
+        #predict-btn { background-color: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
+        #predict-btn:hover { background-color: #2980b9; }
+        .result-box { margin-top: 20px; background-color: #ecf0f1; padding: 15px; border-radius: 8px; }
+        .result-box.hidden { display: none; }
+        .image-preview { max-width: 100%; height: auto; border-radius: 5px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .image-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        .gallery-item { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; border: 2px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+        .loading-spinner { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; margin: 20px auto; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-
-<div class="dashboard-container">
-    <h1>Buffalo Breed Prediction</h1>
-    <p id="userInfo"></p>
-
-    <div class="image-upload-area">
-        <button id="uploadBtn" class="upload-btn">Upload Image</button>
-        <input type="file" id="imageInput" accept="image/*">
-        <img id="image-preview" alt="Preview">
+    <div class="dashboard-header">
+        <h1>BPA Dashboard</h1>
+        <button id="logout-btn">Logout</button>
     </div>
-
-    <div id="prediction-card">
-        <div class="loading-spinner" id="loadingSpinner"></div>
-        <div id="prediction-result">
-            <p>Predicted breed:</p>
-            <h2 id="breed-name"></h2>
-            <p>Confidence: <span id="confidence-value"></span></p>
+    <div class="dashboard-container">
+        <div class="main-content">
+            <div id="upload-section" class="card">
+                <h2>Upload or Capture Image 📸</h2>
+                <div class="image-upload-area">
+                    <input type="file" id="image-upload" accept="image/*" capture="camera">
+                    <button id="predict-btn">Identify Breed</button>
+                    <div class="loading-spinner hidden" id="loadingSpinner"></div>
+                    <div id="prediction-card" class="result-box hidden">
+                        <h3>Prediction Result</h3>
+                        <img id="uploaded-image-preview" src="" alt="Uploaded Image" class="image-preview">
+                        <p><strong>Breed:</strong> <span id="breed-name"></span></p>
+                        <p><strong>Accuracy:</strong> <span id="accuracy-score"></span></p>
+                        <p><strong>Color:</strong> <span id="breed-color">N/A</span></p>
+                        <p><strong>Texture:</strong> <span id="breed-texture">N/A</span></p>
+                        <p><strong>Gender:</strong> <span id="breed-gender">N/A</span></p>
+                        <p><strong>Milk Production:</strong> <span id="milk-production">N/A</span></p>
+                        <p><strong>Common Areas:</strong> <span id="common-areas">N/A</span></p>
+                    </div>
+                </div>
+            </div>
+            <div id="stats-section" class="card">
+                <h2>Statistical Data 📊</h2>
+                <p><strong>Total Animals Identified:</strong> <span id="total-animals">0</span></p>
+                <p><strong>Neeli Ravi Count:</strong> <span id="neeli-ravi-count">0</span></p>
+            </div>
+            <div id="photos-section" class="card">
+                <h2>Collected Photos 🖼️</h2>
+                <div id="image-gallery" class="image-gallery"></div>
+            </div>
         </div>
     </div>
-
-    <button id="logoutBtn" class="logout-btn">Log Out</button>
-</div>
-
-<script src="dashboard.js"></script>
+    <script>
+        const backendURL = "https://bpa-backend-1.onrender.com";
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'login.html';
+                return;
+            }
+            const logoutBtn = document.getElementById('logout-btn');
+            const imageUpload = document.getElementById('image-upload');
+            const predictBtn = document.getElementById('predict-btn');
+            const predictionCard = document.getElementById('prediction-card');
+            const uploadedImagePreview = document.getElementById('uploaded-image-preview');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const totalAnimalsSpan = document.getElementById('total-animals');
+            const neeliRaviCountSpan = document.getElementById('neeli-ravi-count');
+            const imageGallery = document.getElementById('image-gallery');
+            let totalAnimals = parseInt(localStorage.getItem('totalAnimals')) || 0;
+            let neeliRaviCount = parseInt(localStorage.getItem('neeliRaviCount')) || 0;
+            let collectedPhotos = JSON.parse(localStorage.getItem('collectedPhotos')) || [];
+            function updateStatsDisplay() {
+                totalAnimalsSpan.textContent = totalAnimals;
+                neeliRaviCountSpan.textContent = neeliRaviCount;
+            }
+            function loadGallery() {
+                imageGallery.innerHTML = '';
+                collectedPhotos.forEach(src => {
+                    const newImage = document.createElement('img');
+                    newImage.src = src;
+                    newImage.classList.add('gallery-item');
+                    imageGallery.appendChild(newImage);
+                });
+            }
+            updateStatsDisplay();
+            loadGallery();
+            logoutBtn.addEventListener('click', () => {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            });
+            predictBtn.addEventListener('click', async () => {
+                const file = imageUpload.files[0];
+                if (!file) {
+                    alert('Please select an image first.');
+                    return;
+                }
+                loadingSpinner.classList.remove('hidden');
+                predictionCard.classList.add('hidden');
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const res = await fetch(`${backendURL}/predict`, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    if (!res.ok) throw new Error('Prediction failed with status: ' + res.status);
+                    const result = await res.json();
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedImagePreview.src = e.target.result;
+                        predictionCard.classList.remove('hidden');
+                        document.getElementById('breed-name').textContent = result.breed;
+                        document.getElementById('accuracy-score').textContent = result.accuracy;
+                        document.getElementById('breed-color').textContent = result.color || 'N/A';
+                        document.getElementById('breed-texture').textContent = result.texture || 'N/A';
+                        document.getElementById('breed-gender').textContent = result.gender || 'N/A';
+                        document.getElementById('milk-production').textContent = result.milk_production || 'N/A';
+                        document.getElementById('common-areas').textContent = result.common_areas || 'N/A';
+                        totalAnimals++;
+                        if (result.breed === "Neeli Ravi") {
+                            neeliRaviCount++;
+                        }
+                        collectedPhotos.push(e.target.result);
+                        localStorage.setItem('totalAnimals', totalAnimals);
+                        localStorage.setItem('neeliRaviCount', neeliRaviCount);
+                        localStorage.setItem('collectedPhotos', JSON.stringify(collectedPhotos));
+                        updateStatsDisplay();
+                        loadGallery();
+                    };
+                    reader.readAsDataURL(file);
+                } catch (err) {
+                    console.error('Prediction Error:', err);
+                    alert('Prediction failed. Ensure the back-end is running.');
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
