@@ -1,46 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BPA - Login</title>
-  <style>
-    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f8ff; }
-    .login-container { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
-    input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
-    button { padding: 10px 20px; background: #2E86C1; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
-    button:hover { background: #1B4F72; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPA Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f8ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-container { background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); width: 350px; text-align: center; }
+        .login-container h2 { color: #2e86c1; margin-top: 0; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #2e86c1; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background-color 0.3s; }
+        button:hover { background: #1b4f72; }
+        .error-message { color: #e74c3c; font-size: 14px; margin-top: 15px; }
+    </style>
 </head>
-<body>
-
-<div class="login-container">
-  <h2>Login</h2>
-  <input type="text" id="name" placeholder="Enter your name" required>
-  <input type="number" id="age" placeholder="Enter your age" required>
-  <button id="loginBtn">Login</button>
-</div>
-
-<script>
-  const loginBtn = document.getElementById('loginBtn');
-
-  loginBtn.addEventListener('click', () => {
-    const name = document.getElementById('name').value.trim();
-    const age = document.getElementById('age').value.trim();
-
-    if (!name || !age) {
-      alert('Please enter both name and age.');
-      return;
-    }
-
-    // Store user info in localStorage
-    localStorage.setItem('userName', name);
-    localStorage.setItem('userAge', age);
-
-    // Redirect to dashboard
-    window.location.href = 'dashboard.html';
-  });
-</script>
-
+<body class="login-body">
+    <div class="login-container">
+        <h2>Bharat Pashudhan App Login</h2>
+        <form id="login-form">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+            <p id="login-error" class="error-message"></p>
+        </form>
+    </div>
+    <script>
+        const backendURL = "https://bpa-backend-1.onrender.com";
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const loginError = document.getElementById('login-error');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    if (!username || !password) {
+                        loginError.textContent = 'Username and password are required.';
+                        return;
+                    }
+                    try {
+                        const res = await fetch(`${backendURL}/login`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username, password, age: 0 })
+                        });
+                        const data = await res.json();
+                        if (res.ok && data.success) {
+                            localStorage.setItem('isLoggedIn', 'true');
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            loginError.textContent = data.message || 'Login failed. Please check your credentials.';
+                        }
+                    } catch (err) {
+                        console.error("Login Error:", err);
+                        loginError.textContent = 'Could not connect to the server. Try again.';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
